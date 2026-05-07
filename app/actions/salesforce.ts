@@ -117,3 +117,71 @@ export async function createCaseAction(formData: FormData) {
     return { success: false, error: error.message || 'Failed to create case via MCP.' };
   }
 }
+
+// Submit Onboarding to Salesforce (Account, Contact, Opportunity)
+export async function createOnboardingAction(onboardingData: Record<string, any>) {
+  try {
+    // 1. Create Salesforce Account
+    const accountPayload = {
+      Name: onboardingData.companyName,
+      Website: onboardingData.websiteUrl || '',
+      BillingStreet: onboardingData.primaryStreet || '',
+      BillingCity: onboardingData.primaryCity || '',
+      BillingState: onboardingData.primaryState || '',
+      BillingPostalCode: onboardingData.primaryZip || '',
+      BillingCountry: onboardingData.primaryCountry || '',
+      ShippingStreet: onboardingData.billingStreet || onboardingData.primaryStreet || '',
+      ShippingCity: onboardingData.billingCity || onboardingData.primaryCity || '',
+      ShippingState: onboardingData.billingState || onboardingData.primaryState || '',
+      ShippingPostalCode: onboardingData.billingZip || onboardingData.primaryZip || '',
+      ShippingCountry: onboardingData.billingCountry || onboardingData.primaryCountry || '',
+      Description: `Equipment Specialties: ${onboardingData.specialties?.join(', ') || 'None'}. Territory: ${onboardingData.territory || 'Not Specified'}.`
+    };
+
+    const accountResult = await callMCPToolWithRetry('createSobjectRecord', { "sobject-name": "Account", "body": accountPayload });
+    if (accountResult.isError) {
+      throw new Error((accountResult.content as {text: string}[])[0]?.text || 'Failed to create Account');
+    }
+    const accParsed = JSON.parse((accountResult.content as { type: string; text: string }[])[0].text);
+    const accountId = accParsed.id || accParsed.Id;
+
+    // 2. Create Salesforce Contact (Linked to Account)
+    const contactPayload = {
+      FirstName: onboardingData.firstName || '',
+      LastName: onboardingData.lastName || 'Onboarding Contact',
+      Email: onboardingData.email || '',
+      Phone: onboardingData.phone || '',
+      AccountId: accountId,
+      LeadSource: 'Web'
+    };
+
+    const contactResult = await callMCPToolWithRetry('createSobjectRecord', { "sobject-name": "Contact", "body": contactPayload });
+    if (contactResult.isError) {
+      throw new Error((contactResult.content as {text: string}[])[0]?.text || 'Failed to create Contact');
+    }
+
+    // 3. Create Salesforce Opportunity (Linked to Account, Closed Won)
+    const currentDate = new Date().toISOString().split('T')[0];
+    const opportunityPayload = {
+      Name: `${onboardingData.companyName} - Onboarding Opportunity`,
+      StageName: 'Closed Won',
+      CloseDate: currentDate,
+      AccountId: accountId,
+      LeadSource: 'Web',
+      Amount: 150000, // Hardcoded standard onboarding default amount
+      Description: `Onboarding Opportunity for ABC Equipment. Bank Account Name: ${onboardingData.bankName || 'Not Specified'}.`
+    };
+
+    const opportunityResult = await callMCPToolWithRetry('createSobjectRecord', { "sobject-name": "Opportunity", "body": opportunityPayload });
+    if (opportunityResult.isError) {
+      throw new Error((opportunityResult.content as {text: string}[])[0]?.text || 'Failed to create Opportunity');
+    }
+
+    console.log('✅ Onboarding successfully completed for Account ID:', accountId);
+    return { success: true, accountId };
+
+  } catch (error: any) {
+    console.error('❌ Onboarding MCP Error:', error.message);
+    return { success: false, error: error.message || 'Failed to complete onboarding via MCP.' };
+  }
+}

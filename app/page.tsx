@@ -31,7 +31,7 @@ export default function HomePage() {
               Your one-stop platform for support, ordering and business growth.
             </p>
             <div className="flex items-center gap-[12px]">
-              <Link href="#" className="bg-[#F97316] text-white h-[46px] px-6 rounded-[6px] font-bold text-[14px] flex items-center justify-center hover:bg-[#EA580C] transition-colors">
+              <Link href="/onboarding" className="bg-[#F97316] text-white h-[46px] px-6 rounded-[6px] font-bold text-[14px] flex items-center justify-center hover:bg-[#EA580C] transition-colors">
                 Register as Dealer
               </Link>
               <Link href="#" className="bg-transparent border-[2px] border-white text-white h-[46px] px-6 rounded-[6px] font-bold text-[14px] flex items-center justify-center hover:bg-white/10 transition-colors">
@@ -50,7 +50,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-3 gap-[24px]">
             {/* Card 1 */}
-            <Link href="#" className="bg-white rounded-[10px] border border-[#E5E7EB] p-[24px] flex flex-col hover:shadow-md transition-shadow group relative min-h-[180px]">
+            <Link href="/onboarding" className="bg-white rounded-[10px] border border-[#E5E7EB] p-[24px] flex flex-col hover:shadow-md transition-shadow group relative min-h-[180px]">
               <div className="mb-[16px]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0B1F3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>

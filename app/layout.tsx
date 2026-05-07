@@ -59,7 +59,7 @@ function Navbar() {
         {/* Login / Register */}
         <div className="flex items-center gap-[20px]">
           <Link href="#" className="text-white text-[13px] font-semibold hover:text-[#F97316] transition-colors">Login</Link>
-          <Link href="#" className="bg-[#F97316] text-white text-[13px] px-[18px] py-[8px] rounded-[6px] font-bold hover:bg-[#EA580C] transition-colors">Register</Link>
+          <Link href="/onboarding" className="bg-[#F97316] text-white text-[13px] px-[18px] py-[8px] rounded-[6px] font-bold hover:bg-[#EA580C] transition-colors">Register</Link>
         </div>
       </div>
     </header>

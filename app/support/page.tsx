@@ -26,41 +26,42 @@ export default function SupportPage() {
   }
 
   return (
-    <main className="w-full bg-[#F5F6F8] min-h-[calc(100vh-64px)] py-[44px] px-[32px] flex justify-center">
-      <div className="max-w-[1280px] w-full flex flex-col gap-[28px]">
+    <main className="w-full bg-[#F5F6F8] min-h-[calc(100vh-64px)] py-[20px] px-[32px] flex justify-center items-center overflow-hidden">
+      <div className="max-w-[1280px] w-full flex flex-col gap-[16px]">
         
         {/* Title Area */}
         <div>
-          <h1 className="text-[#071B34] text-[28px] font-extrabold tracking-tight mb-[2px]">
+          <h1 className="text-[#071B34] text-[24px] font-extrabold tracking-tight mb-[1px]">
             Raise Support Case
           </h1>
-          <p className="text-[#6B7280] text-[14px] font-medium">
+          <p className="text-[#6B7280] text-[13px] font-medium">
             Let us know how we can help you
           </p>
         </div>
 
         {/* Two-Column Grid */}
-        <div className="grid grid-cols-[55%_45%] gap-[48px] items-center">
+        <div className="grid grid-cols-[55%_45%] gap-[36px] items-center">
           
           {/* Left Column: Form Card */}
-          <div className="bg-white rounded-[10px] border border-[#E5E7EB] p-[32px] shadow-sm">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-[20px]">
+          <div className="bg-white rounded-[10px] border border-[#E5E7EB] p-[24px] shadow-sm">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-[14px]">
+              
               {/* Subject */}
               <div>
-                <label className="block text-[14px] font-bold text-[#071B34] mb-[6px]">
+                <label className="block text-[13px] font-bold text-[#071B34] mb-[4px]">
                   Subject <span className="text-[#F97316]">*</span>
                 </label>
                 <input
                   name="subject"
                   required
                   placeholder="Enter subject"
-                  className="w-full h-[44px] px-[14px] rounded-[6px] border border-[#D1D5DB] text-[14px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] placeholder:text-[#9CA3AF]"
+                  className="w-full h-[40px] px-[12px] rounded-[6px] border border-[#D1D5DB] text-[13px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] placeholder:text-[#9CA3AF]"
                 />
               </div>
 
-              {/* Case Type */}
+              {/* Grid for Case Type */}
               <div>
-                <label className="block text-[14px] font-bold text-[#071B34] mb-[6px]">
+                <label className="block text-[13px] font-bold text-[#071B34] mb-[4px]">
                   Case Type <span className="text-[#F97316]">*</span>
                 </label>
                 <div className="relative">
@@ -68,7 +69,7 @@ export default function SupportPage() {
                     name="caseType"
                     required
                     defaultValue=""
-                    className="w-full h-[44px] px-[14px] pr-[36px] rounded-[6px] border border-[#D1D5DB] text-[14px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] appearance-none"
+                    className="w-full h-[40px] px-[12px] pr-[32px] rounded-[6px] border border-[#D1D5DB] text-[13px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] appearance-none"
                   >
                     <option value="" disabled>Select case type</option>
                     <option value="Mechanical">Mechanical</option>
@@ -77,78 +78,81 @@ export default function SupportPage() {
                     <option value="Structural">Structural</option>
                     <option value="Other">Other</option>
                   </select>
-                  <div className="absolute right-[14px] top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="m6 9 6 6 6-6"/>
                     </svg>
                   </div>
                 </div>
               </div>
 
-              {/* Status */}
-              <div>
-                <label className="block text-[14px] font-bold text-[#071B34] mb-[6px]">
-                  Status <span className="text-[#F97316]">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    name="status"
-                    required
-                    defaultValue="New"
-                    className="w-full h-[44px] px-[14px] pr-[36px] rounded-[6px] border border-[#D1D5DB] text-[14px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] appearance-none"
-                  >
-                    <option value="New">New</option>
-                    <option value="Working">Working</option>
-                    <option value="Escalated">Escalated</option>
-                  </select>
-                  <div className="absolute right-[14px] top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m6 9 6 6 6-6"/>
-                    </svg>
+              {/* Status & Case Origin Side-by-Side */}
+              <div className="grid grid-cols-2 gap-[16px]">
+                {/* Status */}
+                <div>
+                  <label className="block text-[13px] font-bold text-[#071B34] mb-[4px]">
+                    Status <span className="text-[#F97316]">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="status"
+                      required
+                      defaultValue="New"
+                      className="w-full h-[40px] px-[12px] pr-[32px] rounded-[6px] border border-[#D1D5DB] text-[13px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] appearance-none"
+                    >
+                      <option value="New">New</option>
+                      <option value="Working">Working</option>
+                      <option value="Escalated">Escalated</option>
+                    </select>
+                    <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Case Origin */}
-              <div>
-                <label className="block text-[14px] font-bold text-[#071B34] mb-[6px]">
-                  Case Origin <span className="text-[#F97316]">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    name="caseOrigin"
-                    required
-                    defaultValue="Web"
-                    className="w-full h-[44px] px-[14px] pr-[36px] rounded-[6px] border border-[#D1D5DB] text-[14px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] appearance-none"
-                  >
-                    <option value="Web">Web</option>
-                    <option value="Email">Email</option>
-                    <option value="Phone">Phone</option>
-                  </select>
-                  <div className="absolute right-[14px] top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m6 9 6 6 6-6"/>
-                    </svg>
+                {/* Case Origin */}
+                <div>
+                  <label className="block text-[13px] font-bold text-[#071B34] mb-[4px]">
+                    Case Origin <span className="text-[#F97316]">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="caseOrigin"
+                      required
+                      defaultValue="Web"
+                      className="w-full h-[40px] px-[12px] pr-[32px] rounded-[6px] border border-[#D1D5DB] text-[13px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] appearance-none"
+                    >
+                      <option value="Web">Web</option>
+                      <option value="Email">Email</option>
+                      <option value="Phone">Phone</option>
+                    </select>
+                    <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-[14px] font-bold text-[#071B34] mb-[6px]">
+                <label className="block text-[13px] font-bold text-[#071B34] mb-[4px]">
                   Description <span className="text-[#F97316]">*</span>
                 </label>
                 <textarea
                   name="description"
                   required
-                  rows={4}
+                  rows={3}
                   placeholder="Describe your issue in detail..."
-                  className="w-full p-[14px] rounded-[6px] border border-[#D1D5DB] text-[14px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] placeholder:text-[#9CA3AF] resize-none"
+                  className="w-full p-[12px] rounded-[6px] border border-[#D1D5DB] text-[13px] font-medium text-[#111827] bg-white focus:outline-none focus:border-[#F97316] placeholder:text-[#9CA3AF] resize-none"
                 />
               </div>
 
               {error && (
-                <div className="p-[10px_14px] bg-red-50 border border-red-200 rounded-[6px] text-red-600 text-[13px]">
+                <div className="p-[8px_12px] bg-red-50 border border-red-200 rounded-[6px] text-red-600 text-[12px]">
                   {error}
                 </div>
               )}
@@ -158,14 +162,14 @@ export default function SupportPage() {
                 <button
                   type="button"
                   onClick={() => router.push('/')}
-                  className="h-[44px] px-[36px] border border-[#D1D5DB] rounded-[6px] bg-white text-[#374151] font-bold text-[14px] cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="h-[40px] px-[28px] border border-[#D1D5DB] rounded-[6px] bg-white text-[#374151] font-bold text-[13px] cursor-pointer hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="h-[44px] px-[36px] bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-[14px] rounded-[6px] cursor-pointer transition-colors disabled:opacity-50"
+                  className="h-[40px] px-[28px] bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-[13px] rounded-[6px] cursor-pointer transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Case'}
                 </button>
@@ -175,7 +179,7 @@ export default function SupportPage() {
 
           {/* Right Column: Illustration */}
           <div className="flex justify-center items-center">
-            <svg viewBox="0 0 440 380" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[340px] h-auto">
+            <svg viewBox="0 0 440 380" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[280px] h-auto">
               {/* Soft Peach Organic Blob */}
               <path d="M100,160 C100,80 180,60 260,110 C340,160 360,240 300,290 C240,340 140,330 100,280 C60,230 100,240 100,160 Z" fill="#FDF0EB" />
               
