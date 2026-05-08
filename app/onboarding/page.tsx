@@ -91,18 +91,16 @@ export default function OnboardingPage() {
     setIsSubmitting(true);
     setError(null);
 
-    const bankName = formData.get("bankName") as string;
-    const accountNumber = formData.get("accountNumber") as string;
-    const routingNumber = formData.get("routingNumber") as string;
+    // Append Step 1 values to the final FormData object (including arrays)
+    Object.entries(step1Data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach(item => formData.append(key, item));
+      } else {
+        formData.append(key, value);
+      }
+    });
 
-    const mergedData = {
-      ...step1Data,
-      bankName,
-      accountNumber,
-      routingNumber
-    };
-
-    const result = await createOnboardingAction(mergedData);
+    const result = await createOnboardingAction(formData);
 
     if (result.success) {
       router.push(`/support/success?id=${result.accountId}&type=onboarding`);
@@ -445,6 +443,7 @@ export default function OnboardingPage() {
                       </label>
                       <input
                         type="file"
+                        name="businessLicense"
                         className="w-full text-[12px] text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-[4px] file:border-0 file:text-[12px] file:font-semibold file:bg-[#FDF0EB] file:text-[#F97316] hover:file:bg-[#FBE3D8] cursor-pointer"
                       />
                     </div>
@@ -456,6 +455,7 @@ export default function OnboardingPage() {
                       </label>
                       <input
                         type="file"
+                        name="certificateOfInsurance"
                         className="w-full text-[12px] text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-[4px] file:border-0 file:text-[12px] file:font-semibold file:bg-[#FDF0EB] file:text-[#F97316] hover:file:bg-[#FBE3D8] cursor-pointer"
                       />
                     </div>
@@ -467,6 +467,7 @@ export default function OnboardingPage() {
                       </label>
                       <input
                         type="file"
+                        name="taxResidency"
                         className="w-full text-[12px] text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-[4px] file:border-0 file:text-[12px] file:font-semibold file:bg-[#FDF0EB] file:text-[#F97316] hover:file:bg-[#FBE3D8] cursor-pointer"
                       />
                     </div>

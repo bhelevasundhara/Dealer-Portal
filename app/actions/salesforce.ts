@@ -6,7 +6,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 // Cache the client globally so we don't force Salesforce to re-initialize on every request
 let globalMcpClient: Client | null = null;
 
-async function getMCPClient(): Promise<Client> {
+async function getMCPClient(attempt = 1): Promise<Client> {
   if (globalMcpClient) {
     return globalMcpClient;
   }
@@ -41,14 +41,26 @@ async function getMCPClient(): Promise<Client> {
     }
   });
 
-  const client = new Client({ name: 'abc-heavy-equipments', version: '1.0.0' }, { capabilities: {} });
-  await client.connect(transport);
+  try {
+    const client = new Client({ name: 'abc-heavy-equipments', version: '1.0.0' }, { capabilities: {} });
+    await client.connect(transport);
 
-  // Step 3: Initialize session — Salesforce MCP requires listTools before any callTool
-  await client.listTools();
+    // Step 3: Initialize session — Salesforce MCP requires listTools before any callTool
+    await client.listTools();
 
-  globalMcpClient = client;
-  return client;
+    globalMcpClient = client;
+    return client;
+  } catch (err: any) {
+    globalMcpClient = null;
+    
+    // If we catch a cold-start "not been initialized" error during listTools on the first run in the morning:
+    if ((err.message?.includes("not been initialized") || err.message?.includes("HTTP error")) && attempt < 4) {
+      console.log(`⚠️ Salesforce MCP Gateway cold start detected (Container went to sleep overnight). Waking up container (Attempt ${attempt}/3)...`);
+      await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds to let Salesforce spin up the container
+      return getMCPClient(attempt + 1);
+    }
+    throw err;
+  }
 }
 
 // Unified helper to call MCP tools with automatic retry on "not initialized" errors
@@ -118,24 +130,50 @@ export async function createCaseAction(formData: FormData) {
   }
 }
 
-// Submit Onboarding to Salesforce (Account, Contact, Opportunity)
-export async function createOnboardingAction(onboardingData: Record<string, any>) {
+// Submit Onboarding to Salesforce (Account, Contact, Opportunity, ContentVersion Attachments linked to Opportunity)
+export async function createOnboardingAction(formData: FormData) {
   try {
+    // Extract variables from the FormData object
+    const companyName = formData.get("companyName") as string;
+    const websiteUrl = formData.get("websiteUrl") as string || '';
+    const primaryStreet = formData.get("primaryStreet") as string || '';
+    const primaryCity = formData.get("primaryCity") as string || '';
+    const primaryState = formData.get("primaryState") as string || '';
+    const primaryZip = formData.get("primaryZip") as string || '';
+    const primaryCountry = formData.get("primaryCountry") as string || '';
+    const billingStreet = formData.get("billingStreet") as string || primaryStreet;
+    const billingCity = formData.get("billingCity") as string || primaryCity;
+    const billingState = formData.get("billingState") as string || primaryState;
+    const billingZip = formData.get("billingZip") as string || primaryZip;
+    const billingCountry = formData.get("billingCountry") as string || primaryCountry;
+    
+    const specialties = formData.getAll("specialties") as string[];
+    const territory = formData.get("territory") as string || 'Not Specified';
+    
+    const firstName = formData.get("firstName") as string || '';
+    const lastName = formData.get("lastName") as string || 'Onboarding Contact';
+    const email = formData.get("email") as string || '';
+    const phone = formData.get("phone") as string || '';
+    
+    const bankName = formData.get("bankName") as string || '';
+    const accountNumber = formData.get("accountNumber") as string || '';
+    const routingNumber = formData.get("routingNumber") as string || '';
+
     // 1. Create Salesforce Account
     const accountPayload = {
-      Name: onboardingData.companyName,
-      Website: onboardingData.websiteUrl || '',
-      BillingStreet: onboardingData.primaryStreet || '',
-      BillingCity: onboardingData.primaryCity || '',
-      BillingState: onboardingData.primaryState || '',
-      BillingPostalCode: onboardingData.primaryZip || '',
-      BillingCountry: onboardingData.primaryCountry || '',
-      ShippingStreet: onboardingData.billingStreet || onboardingData.primaryStreet || '',
-      ShippingCity: onboardingData.billingCity || onboardingData.primaryCity || '',
-      ShippingState: onboardingData.billingState || onboardingData.primaryState || '',
-      ShippingPostalCode: onboardingData.billingZip || onboardingData.primaryZip || '',
-      ShippingCountry: onboardingData.billingCountry || onboardingData.primaryCountry || '',
-      Description: `Equipment Specialties: ${onboardingData.specialties?.join(', ') || 'None'}. Territory: ${onboardingData.territory || 'Not Specified'}.`
+      Name: companyName,
+      Website: websiteUrl,
+      BillingStreet: primaryStreet,
+      BillingCity: primaryCity,
+      BillingState: primaryState,
+      BillingPostalCode: primaryZip,
+      BillingCountry: primaryCountry,
+      ShippingStreet: billingStreet,
+      ShippingCity: billingCity,
+      ShippingState: billingState,
+      ShippingPostalCode: billingZip,
+      ShippingCountry: billingCountry,
+      Description: `Equipment Specialties: ${specialties?.join(', ') || 'None'}. Territory: ${territory}.`
     };
 
     const accountResult = await callMCPToolWithRetry('createSobjectRecord', { "sobject-name": "Account", "body": accountPayload });
@@ -147,10 +185,10 @@ export async function createOnboardingAction(onboardingData: Record<string, any>
 
     // 2. Create Salesforce Contact (Linked to Account)
     const contactPayload = {
-      FirstName: onboardingData.firstName || '',
-      LastName: onboardingData.lastName || 'Onboarding Contact',
-      Email: onboardingData.email || '',
-      Phone: onboardingData.phone || '',
+      FirstName: firstName,
+      LastName: lastName,
+      Email: email,
+      Phone: phone,
       AccountId: accountId,
       LeadSource: 'Web'
     };
@@ -163,18 +201,57 @@ export async function createOnboardingAction(onboardingData: Record<string, any>
     // 3. Create Salesforce Opportunity (Linked to Account, Closed Won)
     const currentDate = new Date().toISOString().split('T')[0];
     const opportunityPayload = {
-      Name: `${onboardingData.companyName} - Onboarding Opportunity`,
+      Name: `${companyName} - Onboarding Opportunity`,
       StageName: 'Closed Won',
       CloseDate: currentDate,
       AccountId: accountId,
       LeadSource: 'Web',
-      Amount: 150000, // Hardcoded standard onboarding default amount
-      Description: `Onboarding Opportunity for ABC Equipment. Bank Account Name: ${onboardingData.bankName || 'Not Specified'}.`
+      Amount: 150000,
+      Description: `Onboarding Opportunity for ABC Equipment. Bank Account Name: ${bankName || 'Not Specified'}.`
     };
 
     const opportunityResult = await callMCPToolWithRetry('createSobjectRecord', { "sobject-name": "Opportunity", "body": opportunityPayload });
     if (opportunityResult.isError) {
       throw new Error((opportunityResult.content as {text: string}[])[0]?.text || 'Failed to create Opportunity');
+    }
+    const oppParsed = JSON.parse((opportunityResult.content as { type: string; text: string }[])[0].text);
+    const opportunityId = oppParsed.id || oppParsed.Id;
+
+    // 4. Pattern A: Upload File Attachments directly to Salesforce Native Storage (ContentVersion) linked to the Opportunity
+    const filesToUpload = [
+      { key: "businessLicense", label: "Business License" },
+      { key: "certificateOfInsurance", label: "Certificate of Insurance" },
+      { key: "taxResidency", label: "Tax Residency Certificate" }
+    ];
+
+    for (const fileSpec of filesToUpload) {
+      const file = formData.get(fileSpec.key) as File | null;
+      if (file && file.size > 0) {
+        try {
+          const bytes = await file.arrayBuffer();
+          const base64Data = Buffer.from(bytes).toString("base64");
+
+          const contentVersionPayload = {
+            Title: `${companyName} - ${fileSpec.label}`,
+            PathOnClient: file.name || `${fileSpec.key}.pdf`,
+            VersionData: base64Data,
+            FirstPublishLocationId: opportunityId // Attaches file directly to the newly created Opportunity!
+          };
+
+          const fileResult = await callMCPToolWithRetry('createSobjectRecord', { 
+            "sobject-name": "ContentVersion", 
+            "body": contentVersionPayload 
+          });
+
+          if (fileResult.isError) {
+            console.error(`⚠️ Failed to upload file attachment ${fileSpec.label} to Salesforce Opportunity:`, (fileResult.content as {text: string}[])[0]?.text);
+          } else {
+            console.log(`✅ File attachment ${fileSpec.label} uploaded successfully to Opportunity:`, opportunityId);
+          }
+        } catch (fileErr: any) {
+          console.error(`⚠️ File conversion error for ${fileSpec.label}:`, fileErr.message);
+        }
+      }
     }
 
     console.log('✅ Onboarding successfully completed for Account ID:', accountId);
